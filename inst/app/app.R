@@ -5,7 +5,7 @@ library(ggmap)
 library(shinydashboard)
 library(DT)
 
-this_table = data.frame(lat = NULL, lng =NULL, Distance = NULL)
+this_table = data.frame(lat = NA, lng = NA, Distance = NA)
 
 ui <- fluidPage(
   navbarPage("Où Vivre", id="nav",
