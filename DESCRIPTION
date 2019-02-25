@@ -1,9 +1,12 @@
 Package: OuVivre
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-Depends: R (>= 3.5.2)
-License: What license is it under?
+Title: Select the best place to live acoording your constraint
+Version: 0.9.0
+Authors@R: person("Kevin", "Potard", email = "kevin.potard@hotmail.com", role = c("aut", "cre"))
+Description: This package permit to launch a shiny app.
+Depends: R (>= 3.5.0)
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.1.1
+Imports: 
+    shiny
