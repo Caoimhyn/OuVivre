@@ -4,8 +4,9 @@ library(dplyr)
 library(ggmap)
 library(shinydashboard)
 library(DT)
+library(sf)
 
-this_table = data.frame(lat = NA, lng = NA, Distance = NA)
+this_table = data.frame(lat = NULL, lng = NULL, Distance = NULL)
 
 ui <- fluidPage(
   navbarPage("Où Vivre", id="nav",
@@ -26,9 +27,11 @@ ui <- fluidPage(
 
                                     box(DTOutput("data"),
                                         actionButton("delete_btn", "Delete"),
-                                        sliderInput("distance", "Distance maximum d'éloignement en mètres",min=0, max=50000, step = 1, value=1000))
+                                        sliderInput("distance", "Distance maximum d'éloignement en mètres",min=0, max=50000, step = 1, value=1000),
+                                        actionButton("generateZone", "Générer les lieux de vies possible"))
 
-                      ),
+
+                                    ),
 
                       tags$div(id="cite",
                                'All Data are available on ', tags$em('https://www.data.gouv.fr/fr/'), ' and compiled by Kevin POTARD.'
@@ -53,6 +56,8 @@ server <- function(input, output, session) {
 
   })
 
+  this_table <- reactiveVal(this_table)
+
   ## Observe mouse clicks and add markers
   observeEvent(input$map_click, {
     ## Get the click info like had been doing
@@ -66,18 +71,13 @@ server <- function(input, output, session) {
     ## then do something like hide all the markers with hideGroup('markers')
     leafletProxy('map') %>% # use the proxy to save computation
       addMarkers(lng=clng, lat=clat, group='markers')
-  })
 
-  # ------------- Data Absolute panel
-  this_table <- reactiveVal(this_table)
-
-  observeEvent(input$map_click, {
-    click <- input$map_click
     t = rbind(data.frame(lat = click$lat,
                          lng = click$lng,
                          Distance = input$distance), this_table())
     this_table(t)
   })
+
 
   observeEvent(input$delete_btn, {
     t = this_table()
@@ -100,7 +100,15 @@ server <- function(input, output, session) {
     datatable(this_table(), selection = 'single', options = list(dom = 't'))
   })
 
+  observeEvent(input$generateZone,{
+    df_sf <- st_as_sf(this_table(), coords = c("lng", "lat"), crs=4326)
+     print(df_sf)
 
+     df_buf <- st_buffer(df_sf, dist = df_sf$Distance)
+     st_geometry(df_buf)
+     leafletProxy('map') %>% # use the proxy to save computation
+       addCircles(st_geometry(df_buf))
+  })
 
 
 }
