@@ -29,7 +29,7 @@ ui <- fluidPage(
 
                                     box(DTOutput("data"),
                                         actionButton("delete_btn", "Delete"),
-                                        sliderInput("distance", "Distance maximum d'éloignement en mètres",min=0, max=50000, step = 1, value=1000),
+                                        sliderInput("distance", "Distance maximum d'éloignement en km",min=0, max=50, step = 0.5, value=3),
                                         actionButton("generateZone", "Générer les lieux de vies possible"))
 
 
@@ -39,10 +39,6 @@ ui <- fluidPage(
                                'All Data are available on ', tags$em('https://www.data.gouv.fr/fr/'), ' and compiled by Kevin POTARD.'
                       )
              ),
-             tabPanel("result",
-                      leafletOutput("my_tmap")
-
-                      ),
              tabPanel("Data")
   )
 )
@@ -58,7 +54,6 @@ server <- function(input, output, session) {
                    lat1 = 46.53 + 12,
                    lng2 = 2.43 - 7,
                    lat2 = 46.53 - 10)
-
   })
 
   this_table <- reactiveVal(this_table)
@@ -105,20 +100,14 @@ server <- function(input, output, session) {
     datatable(this_table(), selection = 'single', options = list(dom = 't'))
   })
 
-  observeEvent(input$generateZone,{
-
-
-     updateTabsetPanel(session, "nav",
-                       selected = "result")
-  })
 
   # ----------------- Result Panel
 
-  output$my_tmap = renderLeaflet({
+  observeEvent(input$generateZone,{
     df_sf <- st_as_sf(this_table(), coords = c("lng", "lat"), crs=4326)
     df_sf<- st_transform(df_sf, crs=3857)
 
-    df_buf <- st_buffer(df_sf, dist = df_sf$Distance)
+    df_buf <- st_buffer(df_sf, dist = df_sf$Distance*1000)
     geom<-st_geometry(df_buf)
     geom_union<-st_union(geom)
 

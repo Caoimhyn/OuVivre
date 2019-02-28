@@ -9,4 +9,12 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Imports: 
-    shiny
+    shiny,
+    leaflet,
+    dplyr,
+    ggmap,
+    shinydashboard,
+    DT,
+    sf,
+    tmap,
+    leaflet.extras
