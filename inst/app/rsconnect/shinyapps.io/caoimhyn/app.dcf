@@ -5,6 +5,6 @@ account: caoimhyn
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 737778
-bundleId: 1906052
+bundleId: 1906096
 url: https://caoimhyn.shinyapps.io/Ouvivre/
-when: 1551357977.824
+when: 1551359379.86683
