@@ -112,17 +112,19 @@ server <- function(input, output, session) {
     geom_union<-st_union(geom)
 
     geom_intersect<-st_intersection(x=geom[[1]], y=geom[[2]])
-    # geom_intersect<-st_set_crs(geom_intersect,  crs=3857)
+    geom_intersect<-st_sfc(st_cast(geom_intersect,"POLYGON"), crs = 3857)
 
     geom_union_tran <- st_transform(geom_union,  crs=4326)
-    # geom_intersect_tran <- st_transform(geom_intersect,  crs=4326)
+    geom_intersect_tran <- st_transform(geom_intersect,  crs=4326)
 
     proxy <- leafletProxy('map')
     proxy%>%
       clearMarkers()%>%
       clearShapes()%>%
       addPolygons(data=geom_union_tran)
-      # addPolygons(data=geom_intersect, color = "red")
+
+    proxy%>%
+      addPolygons(data=geom_intersect_tran, color = "red")
   })
 }
 
