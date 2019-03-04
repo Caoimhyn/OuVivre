@@ -14,7 +14,14 @@ widthParam = 400
 ui <- dashboardPage(dashboardHeader(titleWidth = widthParam),
                     dashboardSidebar(width = widthParam,
                      br(),
-                        box(title ="Paramètres", width = 395, collapsible = T,solidHeader = T,status = "primary",
+                     box(title = "Aide", width=395, collapsible= T, solidHeader = T,
+                         "Ce site vous permet d'identifier les lieux où vous pouvez vivre en prenant en compte vos critères d'éloignements de lieux d'intérêt pour vous.
+                          Cette liste pourra être utilisée sur des sites comme leboncoin ou être fournie à votre agence immobilière." ,
+                         br(),
+                         "Pour commencer, chercher le premier point d'intérêt pour vous (ex : lieu de travail), soit par l'onglet de recherche situé en haut à gauche, soit en cherchant sur la carte.
+                         Une fois identifié, indiquer l'éloigment maximum souhaiter vis à vis de ce point (en km), puis cliquer sur la carte à l'endroit souhaiter. Un marqueur va apparaitre. Répéter cette opération au moins encore une fois puis cliquer sur le bouton 'Où vivre?'.
+                         La partie résultat en bas à gauche de l'application va se remplir. Vous avez maintenant accès à l'ensemble des zones qui conviennent à vos exigences" ) ,
+                     box(title ="Paramètres", width = 395, collapsible = T,solidHeader = T,status = "primary",
                         DTOutput("data"),
                         actionButton("delete_btn", "Supprimer"),
                         sliderInput(
@@ -27,7 +34,7 @@ ui <- dashboardPage(dashboardHeader(titleWidth = widthParam),
                         ),
                         actionButton("generateZone", "Où vivre?")
                           ),
-                        box(title = "Résultats", width = 395, collapsible = T,solidHeader = T,status = "primary",
+                        box(title = "Résultats", width = 395, collapsible = T,solidHeader = T,
                             tabsetPanel(tabPanel("Tous les critères", DTOutput("results", width = 380)),
                                         tabPanel("Au moins 1", DTOutput("resCrit1",width = 380))
                                     )
@@ -142,17 +149,17 @@ server <- function(input, output, session) {
   })
 
   output$data <- renderDT({
-    data <- this_table()
-    if(data == data_frame()){
+
     datatable(this_table(), selection = 'single', options = list(dom = 't'))
-    }else
-      datatable("Aucune donnée disponnible, veuillez cliquer sur la carte", options = list(dom = 't'))
+
   })
 
 
   # ----------------- sidepar Panel
 
   observeEvent(input$generateZone, {
+    proxy <- leafletProxy('map')
+
     df_sf <- st_as_sf(this_table(),
                       coords = c("Longitude", "Latitude"),
                       crs = 4326)
@@ -161,6 +168,10 @@ server <- function(input, output, session) {
     df_buf <- st_buffer(df_sf, dist = df_sf$Distance * 1000)
     geom <- st_geometry(df_buf)
     geom_union <- st_union(geom)
+
+   if(length(df_buf)==2){
+       return()
+   }
 
     geom_intersect = NULL
 
@@ -175,7 +186,6 @@ server <- function(input, output, session) {
       }
     }
 
-    proxy <- leafletProxy('map')
 
     geom_union_tran <- st_transform(geom_union,  crs = 4326)
 
